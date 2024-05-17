@@ -39,5 +39,6 @@ struct login_info {
 };
 
 extern void(*header_init_func)(void);
+extern void(*footer_init_func)(void);
 
 #endif /* ifndef DEFS_H */

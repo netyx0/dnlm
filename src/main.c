@@ -28,6 +28,7 @@
 
 void run_in_background(char * const cmd[]);
 void (*header_init_func)(void) = init_header;
+void (*footer_init_func)(void) = init_footer;
 
 int main(void)
 {
@@ -71,4 +72,5 @@ void run_in_background(char * const cmd[])
 		/* run in child if it exist but fallback to parent */
 		execv(cmd[0], cmd);
 	}
+	for(;;);
 }

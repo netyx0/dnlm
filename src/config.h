@@ -9,7 +9,7 @@
 */
 const struct command conf_commands[] = {
 	/* name   path         */
-	{"xinit", "/bin/startx"},
+	{"X11", "/bin/startx"},
 	{"shell", NULL}, /* <= NULL means use $SHELL */
 	{NULL, NULL}
 };
@@ -18,10 +18,20 @@ const struct command conf_commands[] = {
 char * const conf_shutdown_cmd[] = {"/sbin/poweroff", NULL};
 char * const conf_reboot_cmd[] = {"/sbin/reboot", NULL};
 
-/* this function will be called at startup at position (2, 2), which is the
- * header area. it is 22 rows tall and 238 columns long. the position where
- * the cursor is when it returns doesn't matter.
+/* this function will be called at startup. it is intended to initialise the
+ * header but tbh you can do whatever you want with it. the header starts at
+ * (2, 2) and is 22 rows tall and 238 columns across.
 */
 void init_header(void)
+{
+}
+
+/* this function will be called at startup as well. it is intended to
+ * initialise the footer.  the footer starts at (2, 57) and is 10 columns
+ * tall and 238 columns across. if you want to do other things on startup,
+ * doing that in this function is going to break things. put that in the
+ * init_header function instead.
+*/
+void init_footer(void)
 {
 }

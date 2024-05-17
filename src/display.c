@@ -99,6 +99,7 @@ static void print_ui(struct login_info *l)
 	fputs(DISPLAY_BASE, stdout);
 
 	header_init_func();
+	footer_init_func();
 
 	move_to_field(PROGRAM);
 	big_print(conf_commands[l->command_id].name);
@@ -278,8 +279,9 @@ static void write_error(void)
 	for (int i = 0; i < ERR_LEN; i++) {
 		big_print(" ");
 	}
-	cp_move_coords(ERR_FIELD_X, ERR_FIELD_Y);
+
 	if (error_message) {
+		cp_move_coords(ERR_FIELD_X, ERR_FIELD_Y);
 		big_print(error_message);
 		error_message = NULL;
 	}
