@@ -21,14 +21,10 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "bigfont.h"
 #include "defs.h"
 #include "display.h"
 #include "display_contents.h"
-
-struct num_pair {
-	int x;
-	int y;
-};
 
 enum field {
 	PROGRAM,
@@ -37,10 +33,6 @@ enum field {
 };
 
 bool insert = false;
-static struct num_pair error_field = {0, 0};
-static struct num_pair program_field = {0, 0};
-static struct num_pair username_field = {0, 0};
-static struct num_pair password_field = {0, 0};
 enum field current_field;
 
 static int username_index;
@@ -58,7 +50,8 @@ static void handle_as_passwordfield(const CP_key key, struct login_info *l);
 static void handle_as_field(const CP_key key, char *field,
                             const enum field next_field,
                             const enum field prev_field,
-                            int *index_ptr);
+                            int *index_ptr, const int field_length,
+                            const bool show);
 
 static void write_program(const int command_id);
 static void write_username(const char *username);
@@ -101,42 +94,18 @@ enum action display(struct login_info *l)
 
 static void print_ui(struct login_info *l)
 {
-	int start_x;
-	int start_y;
-
 	cp_clear();
 	cp_move_coords(1, 1);
-	fputs("Shutdown: [F1]     Reboot: [F2]", stdout);
-
-	start_x = (cp_max_x - MAIN_LEN) / 2;
-	start_y = (cp_max_y - MAIN_HEIGHT) / 2;
-
-	for (int i = 0; MAIN_BOX[i]; i++) {
-		cp_move_coords(start_x, start_y + i);
-		fputs(MAIN_BOX[i], stdout);
-	}
-
-	error_field.x = start_x + ERR_OFFSET_X;
-	error_field.y = start_y + ERR_OFFSET_Y;
-
-	program_field.x = start_x + PROG_OFFSET_X;
-	program_field.y = start_y + PROG_OFFSET_Y;
-
-	username_field.x = start_x + USR_OFFSET_X;
-	username_field.y = start_y + USR_OFFSET_Y;
-
-	password_field.x = start_x + PAS_OFFSET_X;
-	password_field.y = start_y + PAS_OFFSET_Y;
+	fputs(DISPLAY_BASE, stdout);
 
 	move_to_field(PROGRAM);
-	fputs(conf_commands[l->command_id].name, stdout);
+	big_print(conf_commands[l->command_id].name);
 
 	/* move_to_field not used because index might not be 0 */
-	cp_move_coords(username_field.x, username_field.y);
-	fputs(l->username, stdout);
+	cp_move_coords(USR_FIELD_X, USR_FIELD_Y);
+	big_print(l->username);
 
 	write_error();
-
 	fflush(stdout);
 }
 
@@ -145,16 +114,15 @@ static void move_to_field(const enum field field)
 	current_field = field;
 	switch(field) {
 	case PROGRAM:
-		cp_move_coords(program_field.x, program_field.y);
+		cp_move_coords(PROG_FIELD_X, PROG_FIELD_Y);
 		break;
 	case USERNAME:
-		cp_move_coords(username_field.x + username_index, username_field.y);
+		cp_move_coords(USR_FIELD_X + username_index*6 + 3, USR_FIELD_Y);
 		break;
 	case PASSWORD:
-		cp_move_coords(password_field.x, password_field.y);
+		cp_move_coords(PAS_FIELD_X, PAS_FIELD_Y);
 		break;
 	}
-	putchar('\0');
 	fflush(stdout);
 }
 
@@ -205,20 +173,23 @@ static void handle_as_progfield(const CP_key key, struct login_info *l)
 
 static void handle_as_usernamefield(const CP_key key, struct login_info *l)
 {
-	handle_as_field(key, l->username, PASSWORD, PROGRAM, &username_index);
+	handle_as_field(key, l->username, PASSWORD, PROGRAM, &username_index,
+	                USR_LEN, true);
 	write_username(l->username);
 	move_to_field(current_field);
 }
 
 static void handle_as_passwordfield(const CP_key key, struct login_info *l)
 {
-	handle_as_field(key, l->password, PASSWORD, USERNAME, &password_index);
+	handle_as_field(key, l->password, PASSWORD, USERNAME, &password_index,
+	                LOGIN_MAXLEN, false);
 }
 
 static void handle_as_field(const CP_key key, char *field,
                             const enum field next_field,
                             const enum field prev_field,
-                            int *index_ptr)
+                            int *index_ptr, const int field_length,
+                            const bool show)
 {
 	switch(key) {
 	case CP_KEY_DOWN:
@@ -235,7 +206,6 @@ static void handle_as_field(const CP_key key, char *field,
 		}
 		(*index_ptr)--;
 		cp_move_left(1);
-		putchar('\0');
 		fflush(stdout);
 		break;
 	case CP_KEY_RIGHT:
@@ -244,7 +214,6 @@ static void handle_as_field(const CP_key key, char *field,
 		}
 		(*index_ptr)++;
 		cp_move_right(1);
-		putchar('\0');
 		fflush(stdout);
 		break;
 	case CP_KEY_BACKSPACE:
@@ -254,12 +223,14 @@ static void handle_as_field(const CP_key key, char *field,
 		memmove(field + *index_ptr - 1,
 		        field + *index_ptr,
 		        strlen(field + *index_ptr) + 1);
-		write_username(field);
+		if (show) {
+			write_username(field);
+		}
 		(*index_ptr)--;
 		break;
 	default:
 		if (isprint((char)key)) {
-			if (*index_ptr >= LOGIN_MAXLEN) {
+			if (*index_ptr >= field_length) {
 				display_error("username too long");
 				break;
 			}
@@ -280,34 +251,34 @@ static void write_program(const int command_id)
 	fflush(stdout);
 	move_to_field(PROGRAM);
 	for (int i = 0; i < PROG_LEN; i++) {
-		putchar(' ');
+		big_print(" ");
 	}
 	move_to_field(PROGRAM);
-	fputs(conf_commands[command_id].name, stdout);
+	big_print(conf_commands[command_id].name);
 	move_to_field(PROGRAM);
 	fflush(stdout);
 }
 
 static void write_username(const char *name)
 {
-	cp_move_coords(username_field.x, username_field.y);
+	cp_move_coords(USR_FIELD_X, USR_FIELD_Y);
 	for (int i = 0; i < USR_LEN; i++) {
-		putchar(' ');
+		big_print(" ");
 	}
-	cp_move_coords(username_field.x, username_field.y);
-	fputs(name, stdout);
+	cp_move_coords(USR_FIELD_X, USR_FIELD_Y);
+	big_print(name);
 	fflush(stdout);
 }
 
 static void write_error(void)
 {
-	cp_move_coords(error_field.x, error_field.y);
+	cp_move_coords(ERR_FIELD_X, ERR_FIELD_Y);
 	for (int i = 0; i < ERR_LEN; i++) {
-		putchar(' ');
+		big_print(" ");
 	}
-	cp_move_coords(error_field.x, error_field.y);
+	cp_move_coords(ERR_FIELD_X, ERR_FIELD_Y);
 	if (error_message) {
-		fputs(error_message, stdout);
+		big_print(error_message);
 		error_message = NULL;
 	}
 }

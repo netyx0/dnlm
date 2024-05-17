@@ -9,14 +9,18 @@ PREFIX = /usr/local
 
 all: build/whitestorm
 
-build/whitestorm: build/display.o build/start.o build/auth.o build/main.o
-	$(CC) $(CFLAGS) -o $@ build/display.o build/start.o build/auth.o build/main.o $(LDFLAGS) $(LDLIBS)
+build/whitestorm: build/display.o build/start.o build/bigfont.o build/auth.o build/main.o
+	$(CC) $(CFLAGS) -o $@ build/display.o build/start.o build/bigfont.o build/auth.o build/main.o $(LDFLAGS) $(LDLIBS)
 
 build/display.o: src/display.c
 	mkdir -p build
 	$(CC) $(CFLAGS) -c -o $@ $<
 
 build/start.o: src/start.c
+	mkdir -p build
+	$(CC) $(CFLAGS) -c -o $@ $<
+
+build/bigfont.o: src/bigfont.c
 	mkdir -p build
 	$(CC) $(CFLAGS) -c -o $@ $<
 
