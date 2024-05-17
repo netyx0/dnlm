@@ -202,11 +202,13 @@ static void handle_as_usernamefield(const CP_key key, struct login_info *l)
 		break;
 	case CP_KEY_LEFT:
 		if (username_index == 0) {
-			if (username_display_index > 0) {
-				username_display_index--;
-			}
+			/* do nothing */
 		} else {
 			username_index--;
+			if (username_display_index > 0 &&
+			    username_display_index == username_index) {
+				username_display_index--;
+			}
 		}
 		break;
 	case CP_KEY_RIGHT:
@@ -214,7 +216,8 @@ static void handle_as_usernamefield(const CP_key key, struct login_info *l)
 			break;
 		}
 		username_index++;
-		if (username_display_index < strlen(l->username) - USR_LEN) {
+		if (username_index - username_display_index + 1 == USR_LEN &&
+		    username_display_index < strlen(l->username) - USR_LEN) {
 			username_display_index++;
 		}
 		break;
@@ -227,6 +230,15 @@ static void handle_as_usernamefield(const CP_key key, struct login_info *l)
 		        strlen(l->username + username_index) + 1);
 		username_index--;
 		if (username_display_index > 0) {
+			username_display_index--;
+		}
+		break;
+	case CP_KEY_DEL:
+		memmove(l->username + username_index,
+		        l->username + username_index + 1,
+		        strlen(l->username + username_index + 1) + 1);
+		if (username_display_index + USR_LEN > strlen(l->username) &&
+		    username_display_index > 0) {
 			username_display_index--;
 		}
 		break;
@@ -285,6 +297,13 @@ static void handle_as_passwordfield(const CP_key key, struct login_info *l)
 		        l->password + password_index,
 		        strlen(l->password + password_index) + 1);
 		password_index--;
+		break;
+	case CP_KEY_DEL:
+		if (l->username[username_index]) {
+			memmove(l->username + username_index,
+			        l->username + username_index + 1,
+			        strlen(l->username + username_index + 1) + 1);
+		}
 		break;
 	default:
 		if (isprint((char)key)) {
