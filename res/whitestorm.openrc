@@ -1,0 +1,39 @@
+#!/sbin/openrc-run
+
+name="whitestorm"
+description="piece of shit login manager"
+
+## Supervisor daemon
+supervisor=supervise-daemon
+respawn_period=20
+respawn_max=0
+pidfile=/run/"${RC_SVCNAME}.pid"
+
+## Check for getty or agetty
+if [ -x /sbin/getty ] || [ -x /bin/getty ];
+then
+    # busybox
+    commandB="/sbin/getty"
+elif [ -x /sbin/agetty ] || [ -x /bin/agetty ];
+then
+    # util-linux
+    commandUL="/sbin/agetty"
+fi
+
+#wait for 1sec for the screen to clear
+sleep 1s
+
+## The execution vars
+TTY="tty2"
+TERM=linux
+BAUD=38400
+# If we don't have getty then we should have agetty
+command=${commandB:-$commandUL}
+command_args_foreground="-nil /usr/local/bin/whitestorm $TTY $BAUD $TERM"
+
+depend() {
+         after agetty
+         provide display-manager
+         want elogind
+         need local
+}
