@@ -15,9 +15,5 @@
  * with whitestorm. If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include <security/pam_appl.h>
-
-int login(const char *username, const char *passwd);
-void logout(void);
-/* this one is for start */
-char **get_pam_envs(void);
+int auth_and_start(const char *username, const char *password,
+                   const char *cmd);

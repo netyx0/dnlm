@@ -72,6 +72,11 @@ void logout(void)
 	pam_end(handle, status);
 }
 
+char **get_pam_envs(void)
+{
+	return pam_getenvlist(handle);
+}
+
 static void on_pam_error()
 {
 	display_error(pam_strerror(handle, status));
