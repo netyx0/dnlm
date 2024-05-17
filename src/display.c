@@ -299,11 +299,9 @@ static void handle_as_passwordfield(const CP_key key, struct login_info *l)
 		password_index--;
 		break;
 	case CP_KEY_DEL:
-		if (l->username[username_index]) {
-			memmove(l->username + username_index,
-			        l->username + username_index + 1,
-			        strlen(l->username + username_index + 1) + 1);
-		}
+		memmove(l->password + password_index,
+	        l->password + password_index + 1,
+	        strlen(l->password + password_index + 1) + 1);
 		break;
 	default:
 		if (isprint((char)key)) {
