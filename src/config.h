@@ -17,3 +17,11 @@ const struct command conf_commands[] = {
 
 char * const conf_shutdown_cmd[] = {"/sbin/poweroff", NULL};
 char * const conf_reboot_cmd[] = {"/sbin/reboot", NULL};
+
+/* this function will be called at startup at position (2, 2), which is the
+ * header area. it is 22 rows tall and 238 columns long. the position where
+ * the cursor is when it returns doesn't matter.
+*/
+void init_header(void)
+{
+}

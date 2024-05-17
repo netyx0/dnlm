@@ -38,4 +38,6 @@ struct login_info {
 	int command_id;
 };
 
+extern void(*header_init_func)(void);
+
 #endif /* ifndef DEFS_H */

@@ -98,6 +98,8 @@ static void print_ui(struct login_info *l)
 	cp_move_coords(1, 1);
 	fputs(DISPLAY_BASE, stdout);
 
+	header_init_func();
+
 	move_to_field(PROGRAM);
 	big_print(conf_commands[l->command_id].name);
 

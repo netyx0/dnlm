@@ -15,7 +15,7 @@
  * with whitestorm. If not, see <https://www.gnu.org/licenses/>.
 */
 
-#define DISPLAY_BASE \
+#define DISPLAY_BASE "\033[33m"\
 	"+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+\r\n"\
 	"|                                                                                                                                                                                                                                              |\r\n"\
 	"|                                                                                                                                                                                                                                              |\r\n"\
@@ -95,9 +95,9 @@
 #define PAS_FIELD_Y 46
 #define PAS_LEN 30
 
-#define PROG_FIELD_X 18
+#define PROG_FIELD_X 24
 #define PROG_FIELD_Y 31
-#define PROG_LEN 30
+#define PROG_LEN 28
 
 #define ERR_FIELD_X 4
 #define ERR_FIELD_Y 55

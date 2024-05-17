@@ -27,6 +27,7 @@
 #include "start.h"
 
 void run_in_background(char * const cmd[]);
+void (*header_init_func)(void) = init_header;
 
 int main(void)
 {
