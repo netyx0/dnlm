@@ -3,8 +3,8 @@
 
 CC = cc
 CFLAGS = -Wall -Werror
-LDFLAGS =
-LDLIBS = -lpam
+LDFLAGS = 
+LDLIBS = -lpam -lcinderpelt
 PREFIX = /usr/local
 
 all: build/whitestorm
@@ -32,6 +32,4 @@ clean:
 	rm -rf build
 
 install: all
-	install -o root -g root -m 755 build/whitestorm $(PREFIX)/bin/
-	install -o root -g root -m 611 res/whitestorm.pam.conf /etc/pam.d/whitestorm
-	install -o root -g root -m 766 res/whitestorm.openrc /etc/init.d
+	cp build/whitestorm $(PREFIX)/bin/

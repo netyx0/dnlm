@@ -45,7 +45,7 @@ int login(const char *username, const char *passwd)
 
 	status = pam_start("whitestorm", username, &convstruct, &handle);
 	if (status != PAM_SUCCESS) {
-		display_error(pam_strerror(handle, status));
+		display_error((char *)pam_strerror(handle, status));
 		return 1;
 	}
 
@@ -80,7 +80,7 @@ char **get_pam_envs(void)
 
 static void on_pam_error()
 {
-	display_error(pam_strerror(handle, status));
+	display_error((char *)pam_strerror(handle, status));
 	pam_end(handle, status);
 }
 

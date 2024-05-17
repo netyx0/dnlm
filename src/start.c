@@ -15,6 +15,7 @@
  * with whitestorm. If not, see <https://www.gnu.org/licenses/>.
 */
 
+#include <netyx/cinderpelt.h>
 #include <sys/wait.h>
 #include <grp.h>
 #include <pwd.h>
@@ -75,6 +76,9 @@ int auth_and_start(const char *username, const char *password,
 		putenv(env_from_pam[i]);
 	}
 
+	cp_clear();
+	cp_cook();
+
 	child = fork();
 	if (child == -1) {
 		return -1;
@@ -90,11 +94,12 @@ int auth_and_start(const char *username, const char *password,
 		} else {
 			execl(shell, get_shell_argv0(shell), "-i", NULL);
 		}
-		return -1;
 	} else {
 		waitpid(child, NULL, 0);
-		return 0;
 	}
+
+	cp_uncook();
+	return 0;
 }
 
 static char *get_shell_argv0(char *shell)

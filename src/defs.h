@@ -15,8 +15,27 @@
  * with whitestorm. If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include "defs.h"
+#ifndef DEFS_H
+#define DEFS_H
 
-void display_init(void);
-enum action display(struct login_info *l);
-void display_error(char *message);
+struct command {
+	char *name;
+	char *cmd;
+};
+extern const struct command conf_commands[];
+
+enum action {
+	LOGIN,
+	SHUTDOWN,
+	REBOOT
+};
+
+#define LOGIN_MAXLEN 1023 /* this limit is arbitrary, but afaik GNU useradd */
+                          /* has a limit of 32 chars so this is pretty safe */
+struct login_info {
+	char username[LOGIN_MAXLEN + 1];
+	char password[LOGIN_MAXLEN + 1];
+	int command_id;
+};
+
+#endif /* ifndef DEFS_H */

@@ -15,74 +15,59 @@
  * with whitestorm. If not, see <https://www.gnu.org/licenses/>.
 */
 
+#include <netyx/cinderpelt.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
-#include <pwd.h>
 
-#include "auth.h"
 #include "config.h"
+#include "defs.h"
+#include "display.h"
 #include "start.h"
 
-/* this struct is just setting us up for ace lmao */
-struct login_info {
-	char username[1024];
-	char password[1024];
-	char *cmd;
-};
-struct login_info *display_menu(void);
+void run_in_background(char * const cmd[]);
 
 int main(void)
 {
-	int result;
-	struct login_info *l;
+	struct login_info l;
 
-	/* main loop */
+	display_init();
+	memset(l.username, '\0', LOGIN_MAXLEN);
+	memset(l.password, '\0', LOGIN_MAXLEN);
+	l.command_id = 0;
+
+	sleep(1);
+
 	for (;;) {
-		l = display_menu();
-
-		printf("attempting login with creds [%s:%s]\n", l->username, l->password);
-
-		result = auth_and_start(l->username, l->password, l->cmd);
-		printf("process returned %d\n", result);
-		if (result <= 0) {
-			logout();
+		memset(l.password, '\0', LOGIN_MAXLEN);
+		switch(display(&l)) {
+		case LOGIN:
+			/* if it returns 1, PAM has set the error, 0 if success. */
+			if (auth_and_start(l.username, l.password,
+			    conf_commands[l.command_id].cmd) == -1) {
+				display_error("Forking failed");
+			}
+			break;
+		case SHUTDOWN:
+			run_in_background(conf_shutdown_cmd);
+		case REBOOT:
+			run_in_background(conf_reboot_cmd);
+		default:
+			abort();
 		}
 	}
 }
 
-/* wow this is a mess. dont worry though, this is a placeholder */
-struct login_info *display_menu(void)
+void run_in_background(char * const cmd[])
 {
-	static struct login_info l;
-	int entry;
-	int c;
+	pid_t pid;
+	cp_clear();
+	cp_cook();
 
-	// clear
-//	printf("\033[2J\033[0;0H");
-	for (int i = 0; i < NUM_COMMANDS; i++) {
-		printf("%d: %s\n", i, conf_commands[i].name);
+	pid = fork();
+	if (pid < 0 || pid == 0) {
+		/* run in child if it exist but fallback to parent */
+		execv(cmd[0], cmd);
 	}
-	printf("select an entry[0-%ld]: ", NUM_COMMANDS - 1);
-	scanf(" %d", &entry);
-	if (entry < 0 || entry >= NUM_COMMANDS) {
-		puts("bad selection");
-		return display_menu();
-	}
-	printf("username: ");
-	c = getchar();
-	if (c == EOF) {
-		return NULL;
-	}
-	ungetc(c, stdin);
-	scanf("%1023s", l.username);
-	printf("password: ");
-	c = getchar();
-	if (c == EOF) {
-		return NULL;
-	}
-	ungetc(c, stdin);
-	scanf("%1023s", l.password);
-
-	l.cmd = conf_commands[entry].cmd;
-	return &l;
 }

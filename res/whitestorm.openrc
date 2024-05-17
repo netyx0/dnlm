@@ -1,5 +1,8 @@
 #!/sbin/openrc-run
 
+# this script was taken from ly
+# its pretty cool, go check it out
+
 name="whitestorm"
 description="piece of shit login manager"
 
@@ -24,7 +27,7 @@ fi
 sleep 1s
 
 ## The execution vars
-TTY="tty2"
+TTY="tty1"
 TERM=linux
 BAUD=38400
 # If we don't have getty then we should have agetty
@@ -35,5 +38,4 @@ depend() {
          after agetty
          provide display-manager
          want elogind
-         need local
 }
