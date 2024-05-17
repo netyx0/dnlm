@@ -15,7 +15,6 @@
  * with whitestorm. If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include <netyx/cinderpelt.h>
 #include <sys/wait.h>
 #include <grp.h>
 #include <pwd.h>
@@ -25,6 +24,7 @@
 #include <unistd.h>
 
 #include "auth.h"
+#include "defs.h"
 
 /* this limit is kind arbitrary, but most of the time argv0 aint that long */
 #define SHELL_ARGV0_LEN 64
@@ -76,8 +76,7 @@ int auth_and_start(const char *username, const char *password,
 		putenv(env_from_pam[i]);
 	}
 
-	cp_clear();
-	cp_cook();
+	display_login_mode();
 
 	child = fork();
 	if (child == -1) {
@@ -98,7 +97,8 @@ int auth_and_start(const char *username, const char *password,
 		waitpid(child, NULL, 0);
 	}
 
-	cp_uncook();
+	display_display_mode();
+
 	return 0;
 }
 

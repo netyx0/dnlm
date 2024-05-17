@@ -15,7 +15,6 @@
  * with whitestorm. If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include <netyx/cinderpelt.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -27,8 +26,6 @@
 #include "start.h"
 
 void run_in_background(char * const cmd[]);
-void (*header_init_func)(void) = init_header;
-void (*footer_init_func)(void) = init_footer;
 
 int main(void)
 {
@@ -64,8 +61,8 @@ int main(void)
 void run_in_background(char * const cmd[])
 {
 	pid_t pid;
-	cp_clear();
-	cp_cook();
+
+	display_login_mode();
 
 	pid = fork();
 	if (pid < 0 || pid == 0) {

@@ -18,6 +18,10 @@ const struct command conf_commands[] = {
 char * const conf_shutdown_cmd[] = {"/sbin/poweroff", NULL};
 char * const conf_reboot_cmd[] = {"/sbin/reboot", NULL};
 
+
+/* the ANSI escape code for the colour the display should be in. */
+const char *conf_colour_string = "\033[33m";
+
 /* this function will be called at startup. it is intended to initialise the
  * header but tbh you can do whatever you want with it. the header starts at
  * (2, 2) and is 22 rows tall and 238 columns across.

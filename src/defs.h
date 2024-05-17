@@ -23,6 +23,9 @@ struct command {
 	char *cmd;
 };
 extern const struct command conf_commands[];
+extern const char *conf_colour_string;
+void init_header(void);
+void init_footer(void);
 
 enum action {
 	LOGIN,
@@ -38,7 +41,8 @@ struct login_info {
 	int command_id;
 };
 
-extern void(*header_init_func)(void);
-extern void(*footer_init_func)(void);
+void display_login_mode(void);
+void display_display_mode(void);
+
 
 #endif /* ifndef DEFS_H */

@@ -15,7 +15,7 @@
  * with whitestorm. If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include <netyx/cinderpelt.h>
+#include <netyx/cursedpotato.h>
 #include <ctype.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -92,14 +92,28 @@ enum action display(struct login_info *l)
 	}
 }
 
+/* this cooks the terminal and resets everything for the logged in process */
+void display_login_mode(void)
+{
+	cp_clear();
+	cp_cook();
+}
+
+/* this does the opposite */
+void display_display_mode(void)
+{
+	cp_uncook();
+}
+
 static void print_ui(struct login_info *l)
 {
 	cp_clear();
+	fputs(conf_colour_string, stdout);
 	cp_move_coords(1, 1);
 	fputs(DISPLAY_BASE, stdout);
 
-	header_init_func();
-	footer_init_func();
+	init_header();
+	init_footer();
 
 	move_to_field(PROGRAM);
 	big_print(conf_commands[l->command_id].name);
