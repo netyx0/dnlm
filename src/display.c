@@ -36,6 +36,7 @@ bool insert = false;
 enum field current_field;
 
 static int username_index;
+static int username_display_index;
 static int password_index;
 static char *error_message = NULL;
 
@@ -46,15 +47,8 @@ static void handle_key(const CP_key key, struct login_info *l);
 static void handle_as_progfield(const CP_key key, struct login_info *l);
 static void handle_as_usernamefield(const CP_key key, struct login_info *l);
 static void handle_as_passwordfield(const CP_key key, struct login_info *l);
-/* this one's here because theres a lot of overlap between usrname & passwd */
-static void handle_as_field(const CP_key key, char *field,
-                            const enum field next_field,
-                            const enum field prev_field,
-                            int *index_ptr, const int field_length,
-                            const bool show);
-
 static void write_program(const int command_id);
-static void write_username(const char *username);
+static void write_username(const char *username, int offset, int len);
 static void write_error(void);
 
 void display_init(void)
@@ -68,6 +62,11 @@ enum action display(struct login_info *l)
 	CP_key key;
 
 	username_index = strlen(l->username);
+	if (strlen(l->username) > USR_LEN) {
+		username_display_index = strlen(l->username) - USR_LEN;
+	} else {
+		username_display_index = 0;
+	}
 	password_index = 0;
 
 	print_ui(l);
@@ -134,7 +133,9 @@ static void move_to_field(const enum field field)
 		cp_move_coords(PROG_FIELD_X, PROG_FIELD_Y);
 		break;
 	case USERNAME:
-		cp_move_coords(USR_FIELD_X + username_index*6 + 3, USR_FIELD_Y);
+		cp_move_coords(
+			USR_FIELD_X + (username_index - username_display_index)*6 + 3,
+		    USR_FIELD_Y);
 		break;
 	case PASSWORD:
 		cp_move_coords(PAS_FIELD_X, PAS_FIELD_Y);
@@ -190,74 +191,115 @@ static void handle_as_progfield(const CP_key key, struct login_info *l)
 
 static void handle_as_usernamefield(const CP_key key, struct login_info *l)
 {
-	handle_as_field(key, l->username, PASSWORD, PROGRAM, &username_index,
-	                USR_LEN, true);
-	write_username(l->username);
+	switch(key) {
+	case CP_KEY_DOWN:
+	case CP_KEY_ENTER:
+	case CP_KEY_TAB:
+		move_to_field(PASSWORD);
+		break;
+	case CP_KEY_UP:
+		move_to_field(PROGRAM);
+		break;
+	case CP_KEY_LEFT:
+		if (username_index == 0) {
+			if (username_display_index > 0) {
+				username_display_index--;
+			}
+		} else {
+			username_index--;
+		}
+		break;
+	case CP_KEY_RIGHT:
+		if (!l->username[username_index]) {
+			break;
+		}
+		username_index++;
+		if (username_display_index < strlen(l->username) - USR_LEN) {
+			username_display_index++;
+		}
+		break;
+	case CP_KEY_BACKSPACE:
+		if (username_index == 0) {
+			break;
+		}
+		memmove(l->username + username_index - 1,
+		        l->username + username_index,
+		        strlen(l->username + username_index) + 1);
+		username_index--;
+		if (username_display_index > 0) {
+			username_display_index--;
+		}
+		break;
+	default:
+		if (isprint((char)key)) {
+			if (username_index >= LOGIN_MAXLEN) {
+				display_error("username too long");
+				write_error();
+				break;
+			}
+			if (insert) {
+				l->username[username_index++] = key;
+			} else {
+				memmove(l->username + username_index + 1,
+				        l->username + username_index,
+				        strlen(l->username + username_index));
+				l->username[username_index++] = key;
+				if (strlen(l->username) > USR_LEN) {
+					username_display_index++;
+				}
+			}
+		}
+	}
+	write_username(l->username, username_display_index, USR_LEN);
 	move_to_field(current_field);
 }
 
 static void handle_as_passwordfield(const CP_key key, struct login_info *l)
 {
-	handle_as_field(key, l->password, PASSWORD, USERNAME, &password_index,
-	                LOGIN_MAXLEN, false);
-}
-
-static void handle_as_field(const CP_key key, char *field,
-                            const enum field next_field,
-                            const enum field prev_field,
-                            int *index_ptr, const int field_length,
-                            const bool show)
-{
 	switch(key) {
 	case CP_KEY_DOWN:
 	case CP_KEY_ENTER:
 	case CP_KEY_TAB:
-		move_to_field(next_field);
+		move_to_field(PROGRAM);
 		break;
 	case CP_KEY_UP:
-		move_to_field(prev_field);
+		move_to_field(USERNAME);
 		break;
 	case CP_KEY_LEFT:
-		if (*index_ptr == 0) {
+		if (password_index == 0) {
 			break;
 		}
-		(*index_ptr)--;
-		cp_move_left(1);
-		fflush(stdout);
+		password_index--;
 		break;
 	case CP_KEY_RIGHT:
-		if (!field[*index_ptr]) {
+		if (!l->password[password_index]) {
 			break;
 		}
-		(*index_ptr)++;
-		cp_move_right(1);
-		fflush(stdout);
+		password_index++;
 		break;
 	case CP_KEY_BACKSPACE:
-		if (*index_ptr == 0) {
+		if (password_index == 0) {
 			break;
 		}
-		memmove(field + *index_ptr - 1,
-		        field + *index_ptr,
-		        strlen(field + *index_ptr) + 1);
-		if (show) {
-			write_username(field);
-		}
-		(*index_ptr)--;
+		memmove(l->password + password_index - 1,
+		        l->password + password_index,
+		        strlen(l->password + password_index) + 1);
+		password_index--;
 		break;
 	default:
 		if (isprint((char)key)) {
-			if (*index_ptr >= field_length) {
-				display_error("username too long");
+			if (password_index >= LOGIN_MAXLEN) {
+				display_error("password too long");
+				write_error();
 				break;
 			}
 			if (insert) {
-				field[(*index_ptr)++] = key;
+				l->password[password_index++] = key;
 			} else {
-				memmove(field + *index_ptr + 1,
-				        field + *index_ptr,
-				        strlen(field + *index_ptr));
-				field[(*index_ptr)++] = key;
+				memmove(l->password + password_index + 1,
+				        l->password + password_index,
+				        strlen(l->password + password_index));
+				l->password[password_index++] = key;
 			}
 		}
 	}
@@ -276,14 +318,16 @@ static void write_program(const int command_id)
 	fflush(stdout);
 }
 
-static void write_username(const char *name)
+static void write_username(const char *username, int offset, int len)
 {
 	cp_move_coords(USR_FIELD_X, USR_FIELD_Y);
 	for (int i = 0; i < USR_LEN; i++) {
 		big_print(" ");
 	}
 	cp_move_coords(USR_FIELD_X, USR_FIELD_Y);
-	big_print(name);
+	for (int i = offset; i < offset + len; i++) {
+		big_putchar(username[i]);
+	}
 	fflush(stdout);
 }
 
