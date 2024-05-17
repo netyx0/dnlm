@@ -16,6 +16,7 @@
 */
 
 #include <sys/wait.h>
+#include <grp.h>
 #include <pwd.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -79,6 +80,7 @@ int auth_and_start(const char *username, const char *password,
 		return -1;
 	}
 	if (child == 0) {
+		initgroups(username, pw->pw_gid);
 		setgid(pw->pw_gid);
 		setuid(pw->pw_uid);
 
