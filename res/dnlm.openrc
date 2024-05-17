@@ -3,8 +3,8 @@
 # this script was taken from ly
 # its pretty cool, go check it out
 
-name="whitestorm"
-description="piece of shit login manager"
+name="dnlm"
+description="somewhat functional login manager"
 
 ## Supervisor daemon
 supervisor=supervise-daemon
@@ -32,7 +32,7 @@ TERM=linux
 BAUD=38400
 # If we don't have getty then we should have agetty
 command=${commandB:-$commandUL}
-command_args_foreground="-nil /usr/local/bin/whitestorm $TTY $BAUD $TERM"
+command_args_foreground="-nil /usr/local/bin/dnlm $TTY $BAUD $TERM"
 
 depend() {
          after agetty

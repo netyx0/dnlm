@@ -1,11 +1,10 @@
 #include "defs.h"
 
-/* edit this file to configure whitestorm */
+/* edit this file to configure dnlm */
 
 /* entries in the menu for choosing what program to start on login */
 /* 0: name in the menu
  * 1: path to executable
- * 2:
 */
 const struct command conf_commands[] = {
 	/* name   path         */

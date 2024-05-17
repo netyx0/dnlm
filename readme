@@ -1,1 +1,22 @@
-whitestorm - display manager thing, inspired by ly
+dnlm - DyNamic Login Manager
+
+dnlm is a somewhat functional login manager very much inspired by ly.
+
+it is lightweight (i think?) and has only one dependency, libcursedpotato,
+which is my barely functional curses-like thing that really only works on the
+linux virtual console. after installing libcursedpotato, to build dnlm, run:
+
+$ make
+
+to install it, run
+
+$ make install
+
+so far it has only been tested on artix with openrc, and the make install rule
+only really works on that. but all it really does (in addition to moving the
+compiled binary to an appropriate directory) is copy res/dnlm.openrc to the
+directory where the init scripts live and copy res/dnlm.pam.conf to the
+directory where the pam files (what are they called) live. read the makefile
+for more details (it's actually mostly handwritten and human readable!)
+
+have fun :)

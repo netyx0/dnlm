@@ -4,12 +4,12 @@
 CC = cc
 CFLAGS = -Wall -Werror
 LDFLAGS = 
-LDLIBS = -lpam -lcinderpelt
+LDLIBS = -lpam -lcursedpotato
 PREFIX = /usr/local
 
-all: build/whitestorm
+all: build/dnlm
 
-build/whitestorm: build/display.o build/start.o build/bigfont.o build/auth.o build/main.o
+build/dnlm: build/display.o build/start.o build/bigfont.o build/auth.o build/main.o
 	$(CC) $(CFLAGS) -o $@ build/display.o build/start.o build/bigfont.o build/auth.o build/main.o $(LDFLAGS) $(LDLIBS)
 
 build/display.o: src/display.c
@@ -36,4 +36,4 @@ clean:
 	rm -rf build
 
 install: all
-	cp build/whitestorm $(PREFIX)/bin/
+	cp build/dnlm $(PREFIX)/bin/
