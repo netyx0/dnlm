@@ -15,6 +15,7 @@
  * with whitestorm. If not, see <https://www.gnu.org/licenses/>.
 */
 
+#include <security/pam_appl.h>
 #include <stdlib.h>
 #include <string.h>
 
