@@ -100,6 +100,6 @@
 #define PROG_FIELD_Y 31
 #define PROG_LEN 28
 
-#define ERR_FIELD_X 4
+#define ERR_FIELD_X 6
 #define ERR_FIELD_Y 55
-#define ERR_LEN 30
+#define ERR_LEN 38

@@ -3,7 +3,7 @@
 
 CC = cc
 CFLAGS = -Wall -Werror
-LDFLAGS = 
+LDFLAGS =
 LDLIBS = -lpam -lcursedpotato
 PREFIX = /usr/local
 
@@ -37,3 +37,5 @@ clean:
 
 install: all
 	cp build/dnlm $(PREFIX)/bin/
+	cp res/dnlm.openrc /etc/init.d/dnlm
+	cp res/dnlm.pam.conf /etc/pam.d/dnlm

@@ -139,7 +139,7 @@ static void move_to_field(const enum field field)
 		    USR_FIELD_Y);
 		break;
 	case PASSWORD:
-		cp_move_coords(PAS_FIELD_X, PAS_FIELD_Y);
+		cp_move_coords(PAS_FIELD_X + 3, PAS_FIELD_Y);
 		break;
 	}
 	fflush(stdout);
@@ -165,6 +165,7 @@ static void handle_as_progfield(const CP_key key, struct login_info *l)
 	switch(key) {
 	case CP_KEY_DOWN:
 	case CP_KEY_ENTER:
+	case CP_KEY_TAB:
 		move_to_field(USERNAME);
 		break;
 	case CP_KEY_RIGHT:
@@ -351,16 +352,30 @@ static void write_username(const char *username, int offset, int len)
 
 static void write_error(void)
 {
+	bool too_long = false;
+
 	cp_move_coords(ERR_FIELD_X, ERR_FIELD_Y);
 	for (int i = 0; i < ERR_LEN; i++) {
 		big_print(" ");
 	}
 
-	if (error_message) {
-		cp_move_coords(ERR_FIELD_X, ERR_FIELD_Y);
-		big_print(error_message);
-		error_message = NULL;
+	if (!error_message) {
+		return;
 	}
+
+	too_long = strlen(error_message) > ERR_LEN;
+
+	cp_move_coords(ERR_FIELD_X, ERR_FIELD_Y);
+	for (int i = 0; i < ERR_LEN - 3; i++) {
+		if (!error_message[i]) {
+			goto cleanup;
+		}
+		big_putchar(error_message[i]);
+	}
+	big_print(too_long ? "..." : error_message + ERR_LEN - 3);
+
+cleanup:
+	error_message = NULL;
 }
 
 void display_error(char *message)
