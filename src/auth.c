@@ -69,7 +69,11 @@ int login(const char *username, const char *passwd)
 
 void logout(void)
 {
-	if(do_pam_thing(pam_setcred, PAM_DELETE_CRED));
+	if (do_pam_thing(pam_setcred, PAM_DELETE_CRED) ||
+	    do_pam_thing(pam_close_session, 0)
+	) {
+		on_pam_error();
+	}
 
 	pam_end(handle, status);
 }

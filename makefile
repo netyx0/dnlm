@@ -36,6 +36,6 @@ clean:
 	rm -rf build
 
 install: all
-	cp build/dnlm $(PREFIX)/bin/
-	cp res/dnlm.openrc /etc/init.d/dnlm
-	cp res/dnlm.pam.conf /etc/pam.d/dnlm
+	cp -f build/dnlm $(PREFIX)/bin/
+	cp -f res/dnlm.openrc /etc/init.d/dnlm
+	cp -f res/dnlm.pam.conf /etc/pam.d/dnlm
