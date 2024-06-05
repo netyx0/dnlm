@@ -16,7 +16,7 @@
  * with dnlm. If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include <netyx/cursedpotato.h>
+#include <cursedpotato.h>
 #include <ctype.h>
 #include <stdbool.h>
 #include <stdio.h>
